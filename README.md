@@ -31,6 +31,7 @@ port=*:9001
 
 ## Screenshot
 
+![screenshot](https://raw.githubusercontent.com/TortugaLabs/supervisorui-redone/main/img/screenshot.png)
 
 
 ## Authors
@@ -49,6 +50,7 @@ Released under [The BSD 3 clause License](http://www.opensource.org/licenses/BSD
 # TODO
 
 - [supervisord API](http://supervisord.org/api.html#process-control)
+- add link to UI
 - reloadConfig()
 - restart()
 - send signal:
