@@ -1,0 +1,8 @@
+<?php
+/**
+ * Array of servers hosting supervisord running the supervisorui that we wish to connect to
+ */
+return [
+  'server1' => '192.168.32.1:9001',
+  'server2' => '192.168.32.2',
+];

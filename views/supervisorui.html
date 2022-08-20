@@ -1,0 +1,151 @@
+<?php
+/**
+ * @copyright (c) 2012, Luxbet Pty Ltd. All rights reserved.
+ * @license http://www.opensource.org/licenses/BSD-3-Clause
+ */
+?>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Supervisor Servers</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <script>var PHP_SCRIPT = <?= $php_script ?>;</script>
+  <link href="<?=$url_root ?>css/bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
+  <link href="<?=$url_root ?>css/bootstrap-responsive.css" media="screen" rel="stylesheet" type="text/css" />
+  <script src="<?=$url_root?>js/script.js"></script>
+  <style type="text/css">
+    body {
+	    padding-top: 60px;
+	    padding-bottom: 40px;
+    }
+
+    .status {
+	    font-weight: bold;
+	    font-size: 11pt;
+	    padding:4px;
+	    margin-right:10px;
+	    float:right;
+    }
+
+    .fixed-footer {
+	    position: fixed;
+	    left: 0;
+	    right: 0;
+	    bottom: 0;
+    }
+
+    .page-header {
+	    width: 70%;
+    }
+
+    .server-summary, .server-details .page-header {
+	    cursor: pointer;
+    }
+
+    .server-details {
+	    display: none;
+    }
+
+    .services_list {
+	    padding:10px;
+	    width:70%;
+    }
+
+    .services_list div {
+	    padding: 10px;
+    }
+    .services_list div:nth-child(odd) {
+	 background: #eee;
+    }
+
+    .services_list div:nth-child(even) {
+	 background: #ccc;
+    }
+
+    .service-count-warning {
+	    color: red;
+    }
+
+    .service-count-ok {
+	    color: green;
+    }
+
+    #servers {
+	    padding-bottom: 80px;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="navbar navbar-fixed-top">
+    <div class="navbar-inner">
+      <div class="container-fluid">
+	<a class="brand" href=<?=$php_script?>>Supervisor Dashboard</a>
+      </div>
+    </div>
+  </div>
+
+  <?php if ($msg) { echo '<pre>'.htmlspecialchars($msg).'</pre>'; } ?>
+
+  <div class="container">
+    <div id="servers">
+      <div id="server-list">
+	<?php foreach ($status as $superv=>$dat) {
+	  $plu = 'p' . idgen();
+	  $min = 'm' . idgen();
+	  extract($dat);
+	  ?>
+
+	  <div class="server-summary page-header" id="<?= $min ?>" onclick="ffToggle('<?= $min ?>','<?= $plu ?>')">
+	    <h3><i class="icon-plus-sign"></i>
+	      <?= $superv ?>
+	      <small><?= $ip ?> (PID:<?= $pid ?>) watcher: <?= $supervisor ?> </small><span class="server-summary-details" style="float:right"></span>
+	    </h3>
+	  </div>
+
+	  <div class="server-details" id="<?= $plu ?>">
+	    <div class="page-header" onclick="ffToggle('<?= $plu ?>','<?= $min ?>')">
+	      <h3><i class="icon-minus-sign"></i>
+		<?= $superv ?>
+		<small><?= $ip ?> (PID:<?= $pid ?>) watcher: <?= $supervisor ?> </small><span class="server-summary-details" style="float:right"></span>
+	      </h3>
+	    </div>
+	    <div id="<%= id %>_services" class="services_list">
+	      <?php foreach ($dat['services'] as $srv) {
+		extract($srv);
+		$cmdargs = ($running ? 1 : 0)
+			. ','.escapeshellarg(urlencode($ip))
+			. ','.escapeshellarg(urlencode($name))
+			;
+		?>
+		<div class="services-details">
+		  <span style="float:right;">
+		    <button type="button" class="running_action btn btn-mini <?= $running ? 'btn-danger' : 'btn-info' ?>" value="<?= $running ?>"><i class="icon-white <?= $running ? 'icon-stop' : 'icon-play' ?>" onclick="srvcmd(<?= $cmdargs ?>)"></i></button>
+		  </span>
+		  <span class="status label <?= $running ? 'label-success' : 'label-important' ?>">
+		    <?= $statename ?>
+		  </span>
+		  <span>
+		    <h4>
+		      <?php if ($group != $name) {?><?= $group ?> : <?php } ?>
+		      <?= $name ?>
+		    </h4>
+		    <?= htmlspecialchars($description) ?>
+		    <!-- <?= htmlspecialchars(print_r($srv)) ?> -->
+		  </span>
+		</div>
+	      <?php } ?>
+	    </div>
+	  </div>
+	<?php } ?>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer fixed-footer">
+    <footer><a href="https://github.com/TortugaLabs/supervisorui-redone" target="_blank"><img src="<?= $url_root ?>/img/github.png"/></a></footer>
+  </div>
+
+</body>
+</html>
