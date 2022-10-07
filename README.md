@@ -46,13 +46,23 @@ port=*:9001
 
 Released under [The BSD 3 clause License](http://www.opensource.org/licenses/BSD-3-Clause)
 
+# Changes
+
+2022.10-1:
+
+- added links for: supervisor native UI, supervisor restart and config reload.
+- change config format to be the same as the original `supervisorui` script.
+- fixed variable scoping in templates
+- Better error handling
+
+
+# Issues
+
+- API unable to signalProcess
 
 # TODO
 
 - [supervisord API](http://supervisord.org/api.html#process-control)
-- add link to UI
-- reloadConfig()
-- restart()
 - send signal:
   - USR1, graceful restart (apache)
   - HUP, restart now (apache)

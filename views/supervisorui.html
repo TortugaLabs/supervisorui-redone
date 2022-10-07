@@ -10,7 +10,7 @@
   <meta charset="UTF-8" />
   <title>Supervisor Servers</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <script>var PHP_SCRIPT = <?= $php_script ?>;</script>
+  <script>var PHP_SCRIPT = <?= escapeshellarg($php_script) ?>;</script>
   <link href="<?=$url_root ?>css/bootstrap.css" media="screen" rel="stylesheet" type="text/css" />
   <link href="<?=$url_root ?>css/bootstrap-responsive.css" media="screen" rel="stylesheet" type="text/css" />
   <script src="<?=$url_root?>js/script.js"></script>
@@ -81,7 +81,7 @@
   <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container-fluid">
-	<a class="brand" href=<?=$php_script?>>Supervisor Dashboard</a>
+	<a class="brand" href="<?=$php_script?>">Supervisor Dashboard</a>
       </div>
     </div>
   </div>
@@ -92,53 +92,64 @@
     <div id="servers">
       <div id="server-list">
 	<?php foreach ($status as $superv=>$dat) {
-	  $plu = 'p' . idgen();
-	  $min = 'm' . idgen();
-	  extract($dat);
-	  ?>
+	  $fn = function() use ($superv,$dat,$php_script) {
+	    $plu = 'p' . idgen();
+	    $min = 'm' . idgen();
+	    extract($dat);
+	    ?>
+	    <a href="http://<?= $ip ?>/"target="_blank">status</a> :
+	    <a href="<?= $php_script ?>?cmd=reload&ip=<?= urlencode($ip) ?>">reload</a> :
+	    <a href="<?= $php_script ?>?cmd=restart&ip=<?= urlencode($ip) ?>">restart</a> :
 
-	  <div class="server-summary page-header" id="<?= $min ?>" onclick="ffToggle('<?= $min ?>','<?= $plu ?>')">
-	    <h3><i class="icon-plus-sign"></i>
-	      <?= $superv ?>
-	      <small><?= $ip ?> (PID:<?= $pid ?>) watcher: <?= $supervisor ?> </small><span class="server-summary-details" style="float:right"></span>
-	    </h3>
-	  </div>
-
-	  <div class="server-details" id="<?= $plu ?>">
-	    <div class="page-header" onclick="ffToggle('<?= $plu ?>','<?= $min ?>')">
-	      <h3><i class="icon-minus-sign"></i>
+	    <div class="server-summary page-header" id="<?= $min ?>" onclick="ffToggle('<?= $min ?>','<?= $plu ?>')">
+	      <h3><i class="icon-plus-sign"></i>
 		<?= $superv ?>
-		<small><?= $ip ?> (PID:<?= $pid ?>) watcher: <?= $supervisor ?> </small><span class="server-summary-details" style="float:right"></span>
+		<small><?= $ip ?> (PID:<?= $pid ?>) watcher: <?= $supervisor ?> </small>
+		<span class="server-summary-details" style="float:right">
+		  <?php $class_name = ($total_services != $running_services || $total_services == 0) ? 'service-count-warning' : 'service-count-ok'; ?>
+		  <span class="<?= $class_name ?>"><?= $running_services ?> of <?= $total_services ?> running</span>
+		</span>
 	      </h3>
 	    </div>
-	    <div id="<%= id %>_services" class="services_list">
-	      <?php foreach ($dat['services'] as $srv) {
-		extract($srv);
-		$cmdargs = ($running ? 1 : 0)
-			. ','.escapeshellarg(urlencode($ip))
-			. ','.escapeshellarg(urlencode($name))
-			;
-		?>
-		<div class="services-details">
-		  <span style="float:right;">
-		    <button type="button" class="running_action btn btn-mini <?= $running ? 'btn-danger' : 'btn-info' ?>" value="<?= $running ?>"><i class="icon-white <?= $running ? 'icon-stop' : 'icon-play' ?>" onclick="srvcmd(<?= $cmdargs ?>)"></i></button>
-		  </span>
-		  <span class="status label <?= $running ? 'label-success' : 'label-important' ?>">
-		    <?= $statename ?>
-		  </span>
-		  <span>
-		    <h4>
-		      <?php if ($group != $name) {?><?= $group ?> : <?php } ?>
-		      <?= $name ?>
-		    </h4>
-		    <?= htmlspecialchars($description) ?>
-		    <!-- <?= htmlspecialchars(print_r($srv)) ?> -->
-		  </span>
-		</div>
-	      <?php } ?>
+
+	    <div class="server-details" id="<?= $plu ?>">
+	      <div class="page-header" onclick="ffToggle('<?= $plu ?>','<?= $min ?>')">
+		<h3><i class="icon-minus-sign"></i>
+		  <?= $superv ?>
+		  <small><?= $ip ?> (PID:<?= $pid ?>) watcher: <?= $supervisor ?> </small><span class="server-summary-details" style="float:right"></span>
+		</h3>
+	      </div>
+	      <div id="<%= id %>_services" class="services_list">
+		<?php foreach ($dat['services'] as $srv) {
+		  extract($srv);
+		  $cmdargs = ($running ? 1 : 0)
+			  . ','.escapeshellarg(urlencode($ip))
+			  . ','.escapeshellarg(urlencode($name))
+			  ;
+		  ?>
+		  <div class="services-details">
+		    <span style="float:right;">
+		      <button type="button" class="running_action btn btn-mini <?= $running ? 'btn-danger' : 'btn-info' ?>" value="<?= $running ?>"><i class="icon-white <?= $running ? 'icon-stop' : 'icon-play' ?>" onclick="srvcmd(<?= $cmdargs ?>)"></i></button>
+		    </span>
+		    <span class="status label <?= $running ? 'label-success' : 'label-important' ?>">
+		      <?= $statename ?>
+		    </span>
+		    <span>
+		      <h4>
+			<?php if ($group != $name) {?><?= $group ?> : <?php } ?>
+			<?= $name ?>
+		      </h4>
+		      <?= htmlspecialchars($description) ?>
+		      <!-- <?= htmlspecialchars(print_r($srv,true)) ?> -->
+		    </span>
+		  </div>
+		<?php } ?>
+	      </div>
 	    </div>
-	  </div>
-	<?php } ?>
+	<?php
+	  };
+	  $fn();
+	} ?>
       </div>
     </div>
   </div>
